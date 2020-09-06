@@ -33,7 +33,11 @@ source_link: \(.source_link)
 "' "$input_json_file" > "$output_markdown_file"
 
 # append main html text to markdown file (cleaning up any html attributes)
+# also convert line breaks for markdown consumption:
+# https://stackoverflow.com/questions/18572983/converting-traditional-line-breaks-to-markdown-double-space-newlines
 jq --raw-output '.text' "$input_json_file" \
   | pandoc --from html --to markdown \
            --wrap preserve --lua-filter "${script_dir}/pandoc-remove-html-attr.lua" \
+  | pandoc --from markdown_strict+hard_line_breaks --to markdown_strict \
+           --wrap preserve \
   >> "$output_markdown_file"
