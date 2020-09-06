@@ -23,7 +23,7 @@ echo "${input_json_file} -> ${output_markdown_file}"
 
 # append metadata to markdown file
 jq --raw-output '. | "---
-title: \(.title | split("/")[0] | rtrimstr(" "))
+title: \(.title | split("/")[0] | rtrimstr(" ") | split(":") | join("/"))
 author: \(.author)
 genre: \(.genre)
 language: \(.lang)
