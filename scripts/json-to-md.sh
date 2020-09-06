@@ -36,7 +36,7 @@ source_link: \(.source_link)
 # also convert line breaks for markdown consumption:
 # https://stackoverflow.com/questions/18572983/converting-traditional-line-breaks-to-markdown-double-space-newlines
 jq --raw-output '.text' "$input_json_file" \
-  | pandoc --from html --to markdown \
+  | pandoc --from html --to markdown_strict+smart \
            --wrap preserve --lua-filter "${script_dir}/pandoc-remove-html-attr.lua" \
   | pandoc --from markdown_strict+hard_line_breaks --to markdown_strict \
            --wrap preserve \
