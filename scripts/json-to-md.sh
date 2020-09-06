@@ -26,9 +26,9 @@ jq --raw-output '. | "---
 title: \(.title)
 author: \(.author)
 genre: \(.genre)
+language: \(.lang)
 source: \(.source)
 source_link: \(.source_link)
-language: \(.lang)
 ---
 "' "$input_json_file" > "$output_markdown_file"
 
