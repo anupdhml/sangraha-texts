@@ -23,11 +23,16 @@ echo "${input_json_file} -> ${output_markdown_file}"
 
 # append metadata to markdown file
 jq --raw-output '. | "---
-title: \(.title | split("/")[0] | rtrimstr(" ")
-                | if (split(":") | length) > 1
-                  then (split(":")[1:] | join(":") | ltrimstr(" "))
-                  else .
-                  end)
+title: \(if (.source | contains("कविता कोश")) then
+          (.title | split("/")[0] | rtrimstr(" "))
+         elif (.source | contains("साहित्य सङ्ग्रहालय")) then
+          (.title | if (split(":") | length) > 1
+                    then (split(":")[1:] | join(":") | ltrimstr(" "))
+                    else .
+                    end)
+         else
+          .title
+         end)
 author: \(.author)
 genre: \(if .genre != null then .genre else (.title | split(":")[0] | split(" ")[1:-1] | join(" ")) end)
 language: \(.lang)
