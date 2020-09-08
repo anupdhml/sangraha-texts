@@ -17,15 +17,19 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
-output_markdown_file="${input_json_file%.*}.md"
+output_markdown_file=$(echo "${input_json_file%.*}.md" | sed 's/\/json\//\/markdown\//g')
 
 echo "${input_json_file} -> ${output_markdown_file}"
 
 # append metadata to markdown file
 jq --raw-output '. | "---
-title: \(.title | split("/")[0] | rtrimstr(" ") | split(":") | join("/"))
+title: \(.title | split("/")[0] | rtrimstr(" ")
+                | if (split(":") | length) > 1
+                  then (split(":")[1:] | join(":") | ltrimstr(" "))
+                  else .
+                  end)
 author: \(.author)
-genre: \(.genre)
+genre: \(if .genre != null then .genre else (.title | split(":")[0] | split(" ")[1:-1] | join(" ")) end)
 language: \(.lang)
 source: \(.source)
 source_link: \(.source_link)

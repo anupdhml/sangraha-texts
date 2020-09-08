@@ -1,5 +1,5 @@
 ---
-title: कथा / टाइम ट्रावल
+title: टाइम ट्रावल
 author: सविना सिन्धु
 genre: कथा
 language: नेपाली
