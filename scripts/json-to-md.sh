@@ -17,29 +17,45 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
-output_markdown_file=$(echo "${input_json_file%.*}.md" | sed 's/\/json\//\/markdown\//g')
+title=$(jq --raw-output '(
+if (.source | contains("कविता कोश")) then
+  (.title | split("/")[0] | rtrimstr(" "))
+elif (.source | contains("साहित्य सङ्ग्रहालय")) then
+  (.title | if (split(":") | length) > 1
+            then (split(":")[1:] | join(":") | ltrimstr(" "))
+            else .
+            end)
+else
+  .title
+end
+)' "$input_json_file")
+
+author=$(jq --raw-output '.author' "$input_json_file")
+
+if [[ "$input_json_file" == *samples* ]]; then
+  output_markdown_file=$(echo "${input_json_file%.*}.md")
+else
+  base_output_dir="${script_dir}/../data/markdown"
+  if [ ! -d "${base_output_dir}/${author}" ]; then
+    mkdir "${base_output_dir}/${author}"
+  fi
+  output_markdown_file="${base_output_dir}/${author}/${title}.md"
+fi
 
 echo "${input_json_file} -> ${output_markdown_file}"
 
-# append metadata to markdown file
-jq --raw-output '. | "---
-title: \(if (.source | contains("कविता कोश")) then
-          (.title | split("/")[0] | rtrimstr(" "))
-         elif (.source | contains("साहित्य सङ्ग्रहालय")) then
-          (.title | if (split(":") | length) > 1
-                    then (split(":")[1:] | join(":") | ltrimstr(" "))
-                    else .
-                    end)
-         else
-          .title
-         end)
-author: \(.author)
-genre: \(if .genre != null then .genre else (.title | split(":")[0] | split(" ")[1:-1] | join(" ")) end)
+# append title and author metadata to markdown file
+echo "---
+title: ${title}
+author: ${author}" > "$output_markdown_file"
+
+# append other metadata to markdown file
+jq --raw-output '. | "genre: \(if .genre != null then .genre else (.title | split(":")[0] | split(" ")[1:-1] | join(" ")) end)
 language: \(.lang)
 source: \(.source)
 source_link: \(.source_link)
 ---
-"' "$input_json_file" > "$output_markdown_file"
+"' "$input_json_file" >> "$output_markdown_file"
 
 # append main html text to markdown file (cleaning up any html attributes)
 # also convert line breaks for markdown consumption:
